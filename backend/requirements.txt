@@ -1,8 +1,29 @@
+# Web framework
 fastapi>=0.100.0
-uvicorn>=0.23.0
+uvicorn[standard]>=0.23.0
+
+# Data validation & settings
 pydantic>=2.0.0
 pydantic-settings>=2.0.0
+
+# Database
 sqlalchemy>=2.0.0
-pytest>=7.0.0
-httpx>=0.24.0
+
+# RAG — vector store
+chromadb>=0.4.0
+
+# RAG — embeddings  (lazy-loaded, but must be installed)
+sentence-transformers>=2.2.0
+numpy>=1.24.0
+
+# RAG — PDF ingestion (optional at startup but required at import time in extractor.py)
+pypdf>=3.0.0
+
+# LLM client
 openai>=1.12.0
+
+# HTTP client (used by tests & FastAPI TestClient)
+httpx>=0.24.0
+
+# Testing
+pytest>=7.0.0

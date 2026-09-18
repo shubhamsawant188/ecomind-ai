@@ -8,6 +8,7 @@ from app.api.v1.health import health_check
 
 from app.database.base import Base
 from app.database.connection import engine
+import app.models  # noqa: F401 — registers all SQLAlchemy models with Base.metadata
 
 setup_logging()
 
