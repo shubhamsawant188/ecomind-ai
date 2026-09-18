@@ -1,21 +1,20 @@
 from typing import List, Union
 import numpy as np
 
-try:
-    from sentence_transformers import SentenceTransformer
-except ImportError:
-    SentenceTransformer = None
+
 
 class EmbeddingService:
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
-        if SentenceTransformer is None:
-            raise ImportError("sentence-transformers is not installed.")
         self.model_name = model_name
         self._model = None
         
     def load_model(self):
         """Lazy loads the model to avoid blocking on initialization unless needed."""
         if self._model is None:
+            try:
+                from sentence_transformers import SentenceTransformer
+            except ImportError:
+                raise ImportError("sentence-transformers is not installed.")
             # This will automatically download the model from HF if not cached.
             try:
                 self._model = SentenceTransformer(self.model_name)

@@ -1,33 +1,43 @@
 import os
-import chromadb
 from typing import List, Dict, Any
-from chromadb.config import Settings
 import logging
 
 logger = logging.getLogger(__name__)
 
+from app.core.config import BACKEND_DIR
+
 class ChromaKnowledgeStore:
-    def __init__(self, persist_directory: str = "knowledge_base/chroma", collection_name: str = "ecomind_scientific_knowledge"):
+    def __init__(self, persist_directory: str = None, collection_name: str = "ecomind_scientific_knowledge"):
+        if persist_directory is None:
+            persist_directory = str(BACKEND_DIR.parent / "knowledge_base" / "chroma")
         self.persist_directory = persist_directory
         self.collection_name = collection_name
+        self._client = None
+        self._collection = None
         
         # Ensure directory exists
         os.makedirs(self.persist_directory, exist_ok=True)
         
-        # Initialize ChromaDB client
-        self.client = chromadb.PersistentClient(
-            path=self.persist_directory,
-            settings=Settings(
-                anonymized_telemetry=False
+    @property
+    def client(self):
+        if self._client is None:
+            import chromadb
+            from chromadb.config import Settings
+            self._client = chromadb.PersistentClient(
+                path=self.persist_directory,
+                settings=Settings(anonymized_telemetry=False)
             )
-        )
+        return self._client
         
-        # Get or create collection
-        self.collection = self.client.get_or_create_collection(
-            name=self.collection_name,
-            metadata={"hnsw:space": "cosine"} # Use cosine similarity for sentence transformers
-        )
-        logger.info(f"Initialized ChromaDB store at {self.persist_directory}, collection: {self.collection_name}")
+    @property
+    def collection(self):
+        if self._collection is None:
+            self._collection = self.client.get_or_create_collection(
+                name=self.collection_name,
+                metadata={"hnsw:space": "cosine"} # Use cosine similarity for sentence transformers
+            )
+            logger.info(f"Initialized ChromaDB store at {self.persist_directory}, collection: {self.collection_name}")
+        return self._collection
 
     def _prepare_metadata(self, chunk: Dict[str, Any]) -> Dict[str, Any]:
         """Convert complex metadata types to ChromaDB supported primitives (str, int, float, bool)"""
